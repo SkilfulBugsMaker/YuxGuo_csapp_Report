@@ -163,4 +163,31 @@ data lab算是csapp中最水的实验之一了，实验主要涉及到使用各�
     }
     ```
 
-    
+
+### 7. conditional
+
+>/* 
+>
+> \* conditional - same as x ? y : z 
+>
+> \*   Example: conditional(2,4,5) = 4
+>
+> \*   Legal ops: ! ~ & ^ | + << >>
+>
+> \*   Max ops: 16
+>
+> \*   Rating: 3
+>
+> */
+
+- 本实验要求实现一个类似于c语言中的3目运算符的函数，思路是这样的。首先根据输入的x的值是否为0来判断是哪一种情况，根据x的值来构造两种掩码，`0xffffffff`和`0x00000000`，再使用类似于数据选择器的思路即可实现这个3目运算符。
+
+  ``` c
+  int conditional(int x, int y, int z) {
+      int mask = !!x;
+      mask = ~mask+1;
+      return (mask & y) | (~mask & z);
+  }
+  ```
+
+### 8. 
