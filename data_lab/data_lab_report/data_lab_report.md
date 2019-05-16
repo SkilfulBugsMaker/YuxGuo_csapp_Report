@@ -190,4 +190,201 @@ data lab算是csapp中最水的实验之一了，实验主要涉及到使用各�
   }
   ```
 
-### 8. 
+### 8. isLessOrEqual
+
+>   */** 
+>
+>    ** isLessOrEqual - if x <= y  then return 1, else return 0* 
+>
+>    **   Example: isLessOrEqual(4,5) = 1.*
+>
+>    **   Legal ops: ! ~ & ^ | + << >>*
+>
+>    **   Max ops: 24*
+>
+>    **   Rating: 3*
+>
+>    **/*
+
+-   本题主要是实现两个补码数比较大小，对于同符号的补码数，只需要相减再看下结果的符号位是否为0就可以，对于符号不一致的补码数，相减可能导致溢出，所以直接比较大小即可。通过将两个数字的符号位进行异或实现分两种情况讨论。
+
+    ``` c
+    int isLessOrEqual(int x, int y) {
+        int result = y+~x+1;
+        int a=x>>31;
+        int b=y>>31;
+        int xor = a^b;
+        return ((!xor)&!(result >> 31)) | (a&!b);
+    }
+    ```
+
+### 9. logicalNeg
+
+>*/** 
+>
+> ** logicalNeg - implement the ! operator, using all of* 
+>
+> **              the legal operators except !*
+>
+> **   Examples: logicalNeg(3) = 0, logicalNeg(0) = 1*
+>
+> **   Legal ops: ~ & ^ | + << >>*
+>
+> **   Max ops: 12*
+>
+> **   Rating: 4* 
+>
+> **/*
+
+-   我们知道，在所有补码数中，除掉`0x00000000`和`0x80000000`外，其余所有的数字的补码和其相反数的补码符号位不同（一正一负），利用这个性质，我们可以将要特别考虑的整数范围缩小到上面两个数字，其中，对于`0x80000000`，将其与自身取反加1的结果按位或之后，符号位也为1，所以对于所有的非0补码数，其右移-1，而对于0，其右移结果为0，所以只需要再加上1就好了。
+
+    ``` c
+    int logicalNeg(int x) {
+      	return ((x|(~x+1))>>31)+1;
+    }
+    ```
+
+### 10. howManyBits
+
+>   */\* howManyBits - return the minimum number of bits required to represent x in*
+>
+>    **             two's complement*
+>
+>    **  Examples: howManyBits(12) = 5*
+>
+>    **            howManyBits(298) = 10*
+>
+>    **            howManyBits(-5) = 4*
+>
+>    **            howManyBits(0)  = 1*
+>
+>    **            howManyBits(-1) = 1*
+>
+>    **            howManyBits(0x80000000) = 32*
+>
+>    **  Legal ops: ! ~ & ^ | + << >>*
+>
+>    **  Max ops: 90*
+>
+>    **  Rating: 4*
+>
+>    **/*
+
+-   
+
+### 11. floatScale2
+
+>   */** 
+>
+>    ** floatScale2 - Return bit-level equivalent of expression 2\*f for*
+>
+>    **   floating point argument f.*
+>
+>    **   Both the argument and result are passed as unsigned int's, but*
+>
+>    **   they are to be interpreted as the bit-level representation of*
+>
+>    **   single-precision floating point values.*
+>
+>    **   When argument is NaN, return argument*
+>
+>    **   Legal ops: Any integer/unsigned operations incl. ||, &&. also if, while*
+>
+>    **   Max ops: 30*
+>
+>    **   Rating: 4*
+>
+>    **/*
+
+-   对于一个`ieee-754`的浮点数，我们知道I[31]是符号位，I[30:23]是指数位，I[22:0]是数值位，因此实现2乘上一个浮点数只需要将其exp位提取出来加上一即可，同时还要考虑一些边界条件。
+
+    ``` c
+    unsigned floatScale2(unsigned uf) {
+        int expo = (uf&0x7f800000)>>23;
+        int sign = uf&(1<<31);
+        if(expo==255)//若为无穷大，返回无穷大
+            return uf;
+        if(expo==0)//若是0
+            return uf<<1|sign;
+        expo++;
+        if(expo==255)//若乘完是无穷大，返回无穷大 
+            return 0x7f800000|sign;
+        return (expo<<23)|(uf&0x807fffff);
+    }
+    ```
+
+### 12. floatFloat2Int
+
+>   */** 
+>
+>    ** floatFloat2Int - Return bit-level equivalent of expression (int) f*
+>
+>    **   for floating point argument f.*
+>
+>    **   Argument is passed as unsigned int, but*
+>
+>    **   it is to be interpreted as the bit-level representation of a*
+>
+>    **   single-precision floating point value.*
+>
+>    **   Anything out of range (including NaN and infinity) should return*
+>
+>    **   0x80000000u.*
+>
+>    **   Legal ops: Any integer/unsigned operations incl. ||, &&. also if, while*
+>
+>    **   Max ops: 30*
+>
+>    **   Rating: 4*
+>
+>    **/*
+
+-   将浮点数转换为整数。因为float和int表示的数字范围不同，首先要先排除int不能表示的范围，int可以表示$-2^{31}\space\space to\space\space(2^{31}-1) $的数字所以所以对于绝对值小于1或者大于$2^{31}$的数字要舍弃。
+
+### 13. floatPower2
+
+>*/** 
+>
+> ** floatPower2 - Return bit-level equivalent of the expression 2.0^x*
+>
+> **   (2.0 raised to the power x) for any 32-bit integer x.*
+>
+> ***
+>
+> **   The unsigned value that is returned should have the identical bit*
+>
+> **   representation as the single-precision floating-point number 2.0^x.*
+>
+> **   If the result is too small to be represented as a denorm, return*
+>
+> **   0. If too large, return +INF.*
+>
+> *** 
+>
+> **   Legal ops: Any integer/unsigned operations incl. ||, &&. Also if, while* 
+>
+> **   Max ops: 30* 
+>
+> **   Rating: 4*
+>
+> **/*
+
+-   这个比较简单，首先分析得2的浮点数表示为，指数为128，其余都是0。表示为$1\times2^1$。那么$2^x=(1\times2^1)^x=1\times2^x$。所以其实结果的指数位就是$x+127$，代码如下。
+
+    ``` c
+    unsigned floatPower2(int x) {
+        int INF = 0x7f800000;
+        int expo = x + 127;
+        if(expo <= 0) 
+        {
+          return 0;
+        }
+        if(expo >= 255) 
+        {
+          return INF;
+        }
+        return expo << 23;
+    }
+    ```
+
+    
